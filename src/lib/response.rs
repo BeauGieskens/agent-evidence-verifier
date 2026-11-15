@@ -41,6 +41,8 @@ struct SignedRefusal {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 enum RefusalReason {
+    /// The responder's policy does not authorize this requester for this subject.
+    NotAuthorized,
     /// The subject does not resolve to evidence the responder holds.
     NoSuchSubject,
     /// The responder cannot satisfy the coverage constraint as stated.
