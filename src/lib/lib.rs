@@ -4,6 +4,7 @@ mod cll;
 mod record;
 mod request;
 mod response;
+mod serde;
 
 use bytes::Bytes;
 use request::EvidenceSubject;

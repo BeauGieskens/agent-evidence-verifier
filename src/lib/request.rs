@@ -5,7 +5,7 @@ use jiff::Timestamp;
 use nonempty::NonEmpty;
 use serde::{Deserialize, Serialize};
 
-use crate::{CorrelationIdentifier, Digest, Position};
+use crate::{CorrelationIdentifier, Digest, Position, serde::digest};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -35,6 +35,7 @@ pub enum EvidenceSubject {
     /// The responder's checkpoints and their receipts for this stream.
     Checkpoints,
     /// The single record identified by this digest.
+    #[serde(with = "digest")]
     Record(Digest),
     /// The records covered by the given position range, under the coverage anchor's ordering.
     #[serde(with = "position_range_tuple")]
@@ -42,6 +43,7 @@ pub enum EvidenceSubject {
     /// All records the responder holds that carry this correlation identifier.
     Correlation(CorrelationIdentifier),
     /// Every record the responder holds that cites this exchange half.
+    #[serde(with = "digest")]
     Exchange(Digest),
 }
 
@@ -55,6 +57,7 @@ enum EvidenceCoverage {
     /// because the responder never chose it. A requester's own exchange half is a valid pin for an
     /// exchange subject: the responder's record cites it, and the requester sealed it before the
     /// responder's answer existed.
+    #[serde(with = "digest")]
     ExpectedPin(Digest),
 
     /// The requester holds no specific anchor and instead requires that the response be covered by
@@ -73,13 +76,53 @@ enum SizeOrTime {
     Time(Timestamp),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
+/// A named derivation or the digest of a derivation definition.
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum DerivationIdentifier {
     /// Checkpoints, receipts, and consistency proofs for a stream.
-    #[serde(rename = "history_card/1")]
     HistoryCard1,
+    /// Digest of a derivation definition.
     Other(Digest),
+}
+
+impl Serialize for DerivationIdentifier {
+    /// Emits built-in tokens directly and delegates definition digests to the digest codec.
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            Self::HistoryCard1 => serializer.serialize_str("history_card/1"),
+            Self::Other(digest) => digest::serialize(digest, serializer),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for DerivationIdentifier {
+    /// Recognizes the built-in token without treating it as an untagged unit value.
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        enum NamedDerivation {
+            #[serde(rename = "history_card/1")]
+            HistoryCard1,
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum WireIdentifier {
+            Named(NamedDerivation),
+            #[serde(with = "digest")]
+            Digest(Digest),
+        }
+
+        match WireIdentifier::deserialize(deserializer)? {
+            WireIdentifier::Named(NamedDerivation::HistoryCard1) => Ok(Self::HistoryCard1),
+            WireIdentifier::Digest(digest) => Ok(Self::Other(digest)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -2,8 +2,9 @@ use bytes::Bytes;
 use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
-use crate::{Digest, EvidenceSubject};
+use crate::{Digest, EvidenceSubject, serde::digest};
 
+#[derive(Serialize, Deserialize)]
 struct ArtifactResponse {
     /// The actual artifact.
     artifact: Artifact,
@@ -12,20 +13,26 @@ struct ArtifactResponse {
     /// - If [`EvidenceCoverage::ExpectedPin`] was requested, this is verified to match the request.
     /// - If [`EvidenceCoverage::MinFreshness`] was requested, this is the anchor the responder
     ///   selected to satisfy the request.
+    #[serde(with = "digest")]
     anchor: Digest,
     verification_material: (),
+    #[serde(with = "digest")]
     request_digest: Digest,
     issuance_time: Timestamp,
     signature: (),
 }
 
+#[derive(Serialize, Deserialize)]
 enum Artifact {
     Bytes(Bytes),
+    #[serde(with = "digest")]
     DerivationResult(Digest),
 }
 
+#[derive(Serialize, Deserialize)]
 struct SignedRefusal {
     /// The digest of the request being refused, computed over the request bytes as received.
+    #[serde(with = "digest")]
     request_digest: Digest,
     reason: RefusalReason,
     issuance_time: Timestamp,

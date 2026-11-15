@@ -1,12 +1,13 @@
 use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
-use crate::{CorrelationIdentifier, Digest, Position};
+use crate::{CorrelationIdentifier, Digest, Position, serde::digest};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Record {
     seq: Position,
+    #[serde(with = "digest")]
     record_id: Digest,
     record_type: String,
     epistemic_type: EpistemicType,
@@ -40,10 +41,12 @@ enum EpistemicType {
     ObligationReference,
 }
 
+#[serde_with::serde_as]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 struct PayloadCommitments {
     #[serde(rename = "payload_commitments")]
+    #[serde_as(as = "Vec<digest::Codec>")]
     digests: Vec<Digest>,
     retention_state: RetentionState,
 }
@@ -52,6 +55,7 @@ struct PayloadCommitments {
 #[serde(rename_all = "snake_case")]
 struct Link {
     link_type: LinkType,
+    #[serde(with = "digest")]
     target: Digest,
 }
 
