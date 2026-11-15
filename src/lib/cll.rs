@@ -159,18 +159,12 @@ impl ConsistencyProof {
             return Err("prev_commitment contains a partial node value".into());
         }
 
-        let (roots, right_peak_count) = consistent_roots(
-            self.tree_size_1,
-            self.tree_size_2,
+        let roots = consistent_roots(
+            self.tree_size_1 - 1,
             prev_accumulator,
             &self.consistency_paths,
         )?;
-        if self.right_peaks.len() != right_peak_count {
-            return Err(format!(
-                "right_peaks count {} does not match expected count {right_peak_count}",
-                self.right_peaks.len()
-            ));
-        }
+
         let rebuilt = roots.iter().chain(&self.right_peaks).flatten();
         if !rebuilt.eq(checkpoint.commitment.iter()) {
             return Err("rebuilt commitment does not match checkpoint commitment".into());
@@ -263,59 +257,24 @@ fn included_root(mut idx: usize, nodehash: &NodeBytes, proof: &[NodeBytes]) -> N
 }
 
 fn consistent_roots(
-    size_from: usize,
-    size_to: usize,
+    from_idx: usize,
     from_accumulator: &[NodeBytes],
     proofs: &[Vec<NodeBytes>],
-) -> Result<(Vec<NodeBytes>, usize), String> {
-    if size_from >= size_to {
-        return Err(format!(
-            "consistency proof requires increasing sizes, got {size_from} -> {size_to}"
-        ));
-    }
-    if !valid_mmr_node_count(size_from) || !valid_mmr_node_count(size_to) {
-        return Err("consistency proof sizes must be complete MMR sizes".into());
-    }
-    let from_peaks = if size_from == 0 {
-        Vec::new()
-    } else {
-        mmr_peak_idxs(size_from - 1)
-    };
-    let to_peaks = mmr_peak_idxs(size_to - 1);
-    if from_accumulator.len() != from_peaks.len() {
-        return Err("accumulator count does not match origin peak count".into());
-    }
+) -> Result<Vec<NodeBytes>, String> {
+    let from_peaks = mmr_peak_idxs(from_idx);
     if proofs.len() != from_peaks.len() {
         return Err("consistency path count does not match origin peak count".into());
     }
 
     let mut roots = Vec::new();
-    let mut target_idx = 0;
     for ((peak, nodehash), proof) in from_peaks.into_iter().zip(from_accumulator).zip(proofs) {
-        // Append-only growth cannot split an existing perfect tree; the first
-        // target peak at or after an origin peak is its ancestor.
-        while peak > to_peaks[target_idx] {
-            target_idx += 1;
-        }
-        let target_peak = to_peaks[target_idx];
-        let expected = (mmr_idx_height(target_peak) - mmr_idx_height(peak)) as usize;
-        if proof.len() != expected {
-            return Err(format!(
-                "consistency path for peak {peak} has length {}, expected {expected}",
-                proof.len()
-            ));
-        }
         let root = included_root(peak, nodehash, proof);
-        if target_idx == roots.len() {
-            roots.push(root);
-        } else if roots.last() != Some(&root) {
-            return Err(format!(
-                "consistency paths reconstruct different values for target peak {target_peak}"
-            ));
+        if roots.last() == Some(&root) {
+            continue;
         }
+        roots.push(root);
     }
-    let right_peak_count = to_peaks.len() - roots.len();
-    Ok((roots, right_peak_count))
+    Ok(roots)
 }
 
 /// Encodes an optional proof as a byte string containing its CBOR array.
