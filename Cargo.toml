@@ -4,5 +4,27 @@ version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
 
-[dependencies]
-clap = "4"
+[lib]
+path = "src/lib/lib.rs"
+
+[dependencies.bytes]
+version = "1"
+features = ["serde"]
+
+[dependencies.clap]
+version = "4"
+
+[dependencies.jiff]
+version = "0.2"
+features = ["serde"]
+
+[dependencies.nonempty]
+version = "0.12"
+features = ["serialize"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[dependencies.serde_jcs]
+version = "0.2"

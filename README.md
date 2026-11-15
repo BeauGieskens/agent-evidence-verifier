@@ -14,4 +14,4 @@ Licensed under the [Apache License, Version 2.0](LICENSE).
 
 ## Dependencies used
 
-- [clap](https://crates.io/crates/clap) for command line argument parsing.
+See Cargo.toml for the up-to-date list of dependencies.
