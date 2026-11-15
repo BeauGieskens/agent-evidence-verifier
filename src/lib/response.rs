@@ -33,7 +33,6 @@ struct SignedRefusal {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
 enum RefusalReason {
     /// The subject does not resolve to evidence the responder holds.
     NoSuchSubject,
