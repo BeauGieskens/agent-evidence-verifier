@@ -76,13 +76,15 @@ enum SizeOrTime {
     Time(Timestamp),
 }
 
-/// A named derivation or the digest of a derivation definition.
+/// A named derivation or a digest of a derivation definition.
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum DerivationIdentifier {
+pub(crate) enum DerivationIdentifier {
     /// Checkpoints, receipts, and consistency proofs for a stream.
     HistoryCard1,
     /// Digest of a derivation definition.
     Other(Digest),
+    /// Retained so capability checks can refuse it with `derivation_unsupported` (§3.3).
+    UnsupportedToken(String),
 }
 
 impl Serialize for DerivationIdentifier {
@@ -94,6 +96,7 @@ impl Serialize for DerivationIdentifier {
         match self {
             Self::HistoryCard1 => serializer.serialize_str("history_card/1"),
             Self::Other(digest) => digest::serialize(digest, serializer),
+            Self::UnsupportedToken(token) => serializer.serialize_str(token),
         }
     }
 }
@@ -116,11 +119,13 @@ impl<'de> Deserialize<'de> for DerivationIdentifier {
             Named(NamedDerivation),
             #[serde(with = "digest")]
             Digest(Digest),
+            UnsupportedToken(String),
         }
 
         match WireIdentifier::deserialize(deserializer)? {
             WireIdentifier::Named(NamedDerivation::HistoryCard1) => Ok(Self::HistoryCard1),
             WireIdentifier::Digest(digest) => Ok(Self::Other(digest)),
+            WireIdentifier::UnsupportedToken(token) => Ok(Self::UnsupportedToken(token)),
         }
     }
 }

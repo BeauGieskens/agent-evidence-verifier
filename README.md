@@ -4,6 +4,12 @@ Made as a clean-room implementation based on the draft specifications during the
 
 Licensed under the [Apache License, Version 2.0](LICENSE).
 
+## A quick note
+
+The final commit on this repository was authored by OpenAI GPT Sol 6.1, which was done to get the project over the line for being able to run against the evidence request vectors. I didn't have time to iterate any further myself nor read into the drafts that would be necessary to implement it myself. The model was given the direction to make implementations based on the drafts, without trusting the assertions made by the test vectors or looking at the code in [the repo they came from](https://github.com/action-state-group/agent-action-capsule/tree/65265948fff3bc0af4963020d58883644be2002a/vectors). The `protocol`, `semantics`, `signatures`, `verify`, and `wire` modules were produced in this way.
+
+The work that's present in the `cll`, `record`, `request`, and `response` modules is my own, and is an authentic representation of how I interpreted the drafts and was implementing them by hand.
+
 ## Specifications used
 
 - Evidence Request: [draft-mih-agent-evidence-request-02](https://datatracker.ietf.org/doc/draft-mih-agent-evidence-request/02/)
@@ -12,6 +18,24 @@ Licensed under the [Apache License, Version 2.0](LICENSE).
 - Evidence Layer: [draft-mih-agent-evidence-layer-00](https://datatracker.ietf.org/doc/draft-mih-agent-evidence-layer/00/)
 - Evidence Bundle: [draft-mih-zhang-agent-disclosure-bundle-02](https://datatracker.ietf.org/doc/draft-mih-zhang-agent-disclosure-bundle/02/)
 - Agent Action Capsule: [draft-mih-scitt-agent-action-capsule-05](https://datatracker.ietf.org/doc/draft-mih-scitt-agent-action-capsule/05/)
+
+## Running
+
+```sh
+# Run every executable case in the vendored evidence-request corpus.
+cargo run -- --vectors vectors/evidence-request
+
+# Run one corpus, or one exact case (useful from shell loops).
+cargo run -- --vectors vectors/evidence-request/request.json
+cargo run -- --vectors vectors/evidence-request --case pos-subject-record
+
+# Verify a concrete signed refusal against original request bytes.
+cargo run -- request.json response.json --trust keys.json
+```
+
+`keys.json` is a JSON array of trusted raw Ed25519 public keys as hex strings. Keys in a received response are never trusted automatically. Request and response files may contain JSON or CBOR; CBOR files contain raw bytes, not hex text.
+
+Output is JSON (one line per case in vector mode). Summary/errors go to stderr. Exit status: **0** = verified refusal or all selected vector assertions passed; **1** = rejected response or vector mismatch; **2** = usage, input, or unsupported verification operation. A verified refusal means an authentic refusal, **not** that the evidence request was granted. Malformed requests can receive valid refusals.
 
 ## Gaps identified
 

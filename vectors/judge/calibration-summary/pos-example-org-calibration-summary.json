@@ -1,0 +1,25 @@
+{
+  "clauses": [
+    {
+      "agreement": {
+        "k": 17,
+        "n": 20
+      },
+      "clause_ref": "req-claim-1",
+      "drift": {
+        "k": 1,
+        "n": 20
+      }
+    }
+  ],
+  "computed_at": "2026-09-25T00:00:00Z",
+  "epistemic_type": "derived_metric",
+  "judge_pin": {
+    "citation_purpose": "calibrates",
+    "digest": "90b5b2951e3aaf6f864f3dd6d8e13ccef113569ff0c14000f47bce9249c6a935",
+    "digest_alg": "SHA-256",
+    "type": "judge-pin"
+  },
+  "record_id": "cal-example-org-1",
+  "record_version": "calibration-summary/v1"
+}

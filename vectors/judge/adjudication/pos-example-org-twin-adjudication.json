@@ -1,0 +1,40 @@
+{
+  "adjudicated_at": "2026-09-25T00:00:00Z",
+  "basis": {
+    "model_id": "example-org-referee-v1",
+    "prompt_digest": {
+      "digest": "c538cf34c5c670745bd488ba42acb4871697df3f656c6fb1b2445db531fe7aae",
+      "digest_alg": "SHA-256"
+    },
+    "sampling": {
+      "seed": 7,
+      "temperature_micros": 0
+    },
+    "weights_digest": {
+      "digest": "61c72924d032d0843bb90553251b7aface982a9e007c0dd785c81bd48a8c34e2",
+      "digest_alg": "SHA-256"
+    }
+  },
+  "contradicted_party": "half-b",
+  "divergence_index": "0.37",
+  "epistemic_type": "adjudication",
+  "margin": "0.42",
+  "margin_tau": "0.05",
+  "parties": [
+    {
+      "citation_purpose": "adjudicated_party",
+      "digest": "de48e20b5c547e2830ed017901326c74314076e464bb5ced8c9b22814c2ba305",
+      "digest_alg": "SHA-256",
+      "type": "twin-half"
+    },
+    {
+      "citation_purpose": "adjudicated_party",
+      "digest": "3732a046cd23de446eeec60901cd1247c8d8fb5b4d9c26ff2c6b1f27aa7021fb",
+      "digest_alg": "SHA-256",
+      "type": "twin-half"
+    }
+  ],
+  "record_id": "adj-example-org-1",
+  "record_version": "adjudication/v1",
+  "verdict": "contradicted"
+}

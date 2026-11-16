@@ -1,0 +1,14 @@
+{
+  "adjudication": {
+    "citation_purpose": "responds_to",
+    "digest": "34f4af9c7015ad6a01ec739d0b757ce8b993d037c11390f89b0b8b7ed531e1c0",
+    "digest_alg": "SHA-256",
+    "type": "adjudication"
+  },
+  "epistemic_type": "producer_claim",
+  "kind": "delivery_receipt",
+  "record_id": "adjr-example-org-1",
+  "record_version": "adjudication-response/v1",
+  "responded_at": "2026-09-25T00:00:00Z",
+  "verdict": "contradicted"
+}

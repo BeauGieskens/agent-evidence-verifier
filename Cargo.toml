@@ -7,6 +7,9 @@ license = "Apache-2.0"
 [lib]
 path = "src/lib/lib.rs"
 
+[dependencies.base64]
+version = "0.22"
+
 [dependencies.bytes]
 version = "1"
 features = ["serde"]
@@ -16,9 +19,15 @@ version = "0.2"
 
 [dependencies.clap]
 version = "4"
+features = ["derive"]
 
 [dependencies.cose-rust]
 version = "0.1"
+
+[dependencies.ed25519-dalek]
+version = "2"
+default-features = false
+features = ["std"]
 
 [dependencies.hex]
 version = "0.4"
@@ -34,6 +43,10 @@ features = ["serialize"]
 [dependencies.serde]
 version = "1.0"
 features = ["derive"]
+
+[dependencies.serde_json]
+version = "1"
+features = ["arbitrary_precision", "raw_value"]
 
 [dependencies.serde_jcs]
 version = "0.2"
